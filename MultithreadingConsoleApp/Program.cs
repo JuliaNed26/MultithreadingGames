@@ -2,16 +2,16 @@
 
 class Program
 {
-    public static int _counter;
-    
+    private static ThreadLocal<StringBuilder> s = new ThreadLocal<StringBuilder>(() => new StringBuilder());
+
     static void Main()
     {
         Thread t1 = new Thread(IncrementThreadLocal);
         Thread t2 = new Thread(IncrementThreadLocal);
-        
+
         t1.Start();
         t2.Start();
-        
+
         t1.Join();
         t2.Join();
     }
@@ -20,8 +20,8 @@ class Program
     {
         for (int i = 0; i < 5; i++)
         {
-            _counter++;
-            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: {_counter}");
+            s.Value.Append(i);
+            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: {s.Value}");
         }
     }
 }
