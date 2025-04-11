@@ -2,8 +2,8 @@
 
 class Program
 {
-    [ThreadStatic]
     public static int _counter;
+    
     static void Main()
     {
         Thread t1 = new Thread(IncrementThreadLocal);
