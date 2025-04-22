@@ -4,27 +4,21 @@ public class CountdownService
 {
     public void PrintCountdown(string? startNumber)
     {
-        int countdownNumber = 0;
-        try
+        if (!int.TryParse(startNumber, out var countdownNumber))
         {
-            if (!int.TryParse(startNumber, out countdownNumber))
-            {
-                throw new ArgumentException("Can not parse value from console to int.", startNumber);
-            }
-
-            if (countdownNumber <= 0)
-            {
-                throw new ArgumentOutOfRangeException("Number for countdown should be greater than zero", startNumber);
-            }
+            throw new ArgumentException("Can not parse value from console to int.", startNumber);
         }
-        catch (Exception e)
+
+        if (countdownNumber <= 0)
         {
-            Console.WriteLine(e.Message);
+            throw new ArgumentOutOfRangeException("Number for countdown should be greater than zero", startNumber);
         }
 
 
         while (Console.ReadKey().Key != ConsoleKey.Spacebar)
-        { }
+        {
+        }
+
         for (int i = countdownNumber; i > 0; i--)
         {
             Console.WriteLine(i);
