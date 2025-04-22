@@ -1,27 +1,12 @@
-﻿using System.Text;
+﻿// See https://aka.ms/new-console-template for more information
 
-class Program
-{
-    private static ThreadLocal<StringBuilder> s = new ThreadLocal<StringBuilder>(() => new StringBuilder());
+using MultithreadingConsoleApp;
+var countdownService = new CountdownService();
+Console.WriteLine("Write number to start countdoun from: ");
+var countdownNumber = Console.ReadLine();
 
-    static void Main()
-    {
-        Thread t1 = new Thread(IncrementThreadLocal);
-        Thread t2 = new Thread(IncrementThreadLocal);
-
-        t1.Start();
-        t2.Start();
-
-        t1.Join();
-        t2.Join();
-    }
-
-    static void IncrementThreadLocal()
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            s.Value.Append(i);
-            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: {s.Value}");
-        }
-    }
-}
+var countdownThread = new Thread(() => countdownService.PrintCountdown(countdownNumber));
+Console.WriteLine(countdownThread.IsBackground);
+Console.WriteLine(countdownThread.Priority);
+countdownThread.Start();
+Console.WriteLine("Press spacebar to start thread");
