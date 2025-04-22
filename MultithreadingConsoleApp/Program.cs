@@ -14,8 +14,12 @@ try
 }
 catch (AggregateException exceptionThrownByTask)
 {
-    foreach (var innerException in exceptionThrownByTask.InnerExceptions)
+    exceptionThrownByTask.Handle(ex =>
     {
-        Console.WriteLine(innerException.Message);
-    }
+        if (ex is ArgumentOutOfRangeException)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        return ex is ArgumentOutOfRangeException;
+    });
 }
