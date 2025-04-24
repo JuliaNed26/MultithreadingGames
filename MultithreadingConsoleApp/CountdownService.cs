@@ -2,26 +2,45 @@
 
 public class CountdownService
 {
+    private static ThreadLocal<int> threadLocalCounter = new (() => 0);
+
     public void PrintCountdown(string? startNumber)
     {
-        if (!int.TryParse(startNumber, out var countdownNumber))
+        var currentThreadName = Thread.CurrentThread.Name;
+        
+        int countdownNumber = 0;
+        try
         {
-            throw new ArgumentException("Can not parse value from console to int.", startNumber);
+            if (!int.TryParse(startNumber, out countdownNumber))
+            {
+                throw new ArgumentException("Can not parse value from console to int.", startNumber);
+            }
+
+            if (countdownNumber <= 0)
+            {
+                throw new ArgumentOutOfRangeException("Number for countdown should be greater than zero", startNumber);
+            }
         }
-
-        if (countdownNumber <= 0)
+        catch (Exception e)
         {
-            throw new ArgumentOutOfRangeException("Number for countdown should be greater than zero", startNumber);
-        }
-
-
-        while (Console.ReadKey().Key != ConsoleKey.Spacebar)
-        {
+            Console.WriteLine(e.Message);
         }
 
         for (int i = countdownNumber; i > 0; i--)
         {
-            Console.WriteLine(i);
+            Console.WriteLine($"{currentThreadName}: {i}");
+            Thread.Sleep(100);
         }
+    }
+
+    public void IncreaseLocalVariable(CancellationToken ct)
+    {
+        var isCancelled = ct.IsCancellationRequested;
+        while (!Volatile.Read(ref isCancelled))
+        {
+            threadLocalCounter.Value++;
+            isCancelled = ct.IsCancellationRequested;
+        }
+        Console.WriteLine($"{Thread.CurrentThread.Name} : {threadLocalCounter.Value}");
     }
 }

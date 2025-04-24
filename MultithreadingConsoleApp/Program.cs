@@ -5,21 +5,15 @@ var countdownService = new CountdownService();
 Console.WriteLine("Write number to start countdoun from: ");
 var countdownNumber = Console.ReadLine();
 
-var countdownTask = new Task(() => countdownService.PrintCountdown(countdownNumber));
-countdownTask.Start();
-Console.WriteLine("Press spacebar to start thread");
-try
-{
-    countdownTask.Wait();
-}
-catch (AggregateException exceptionThrownByTask)
-{
-    exceptionThrownByTask.Handle(ex =>
-    {
-        if (ex is ArgumentOutOfRangeException)
-        {
-            Console.WriteLine(ex.Message);
-        }
-        return ex is ArgumentOutOfRangeException;
-    });
-}
+var cancellationTokenSource = new CancellationTokenSource();
+var token = cancellationTokenSource.Token;
+var countdownThread1 = new Thread(() => countdownService.IncreaseLocalVariable(token));
+var countdownThread2 = new Thread(() => countdownService.IncreaseLocalVariable(token));
+
+countdownThread1.Name = "Thread 1";
+countdownThread2.Name = "Thread 2";
+countdownThread1.Priority = ThreadPriority.Highest;
+countdownThread2.Priority = ThreadPriority.Normal;
+countdownThread1.Start();
+countdownThread2.Start();
+cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(30));
