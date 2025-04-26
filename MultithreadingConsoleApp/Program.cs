@@ -2,26 +2,24 @@
 
 using MultithreadingConsoleApp;
 
-var bankAccount = new BankAccount();
+var threadSafeQueue = new SafeQueue<int>();
 
 int iterations = 100;
-var depositThread = new Thread(() =>
+var consumerThread = new Thread(() =>
 {
     for (int i = 0; i < iterations; i++)
     {
-        bankAccount.Deposit(100);
+        Console.WriteLine(threadSafeQueue.Dequeue());    
     }
 });
-var withdrawalThread = new Thread(() =>
+var producerThread = new Thread(() =>
 {
     for (int i = 0; i < iterations; i++)
     {
-        bankAccount.Withdraw(50);
+        threadSafeQueue.Enqueue(i);
     }
 });
-depositThread.Start();
-withdrawalThread.Start();
-depositThread.Join();
-withdrawalThread.Join();
-
-Console.WriteLine($"Balance: {bankAccount.Balance}");
+consumerThread.Start();
+producerThread.Start();
+producerThread.Join();
+consumerThread.Join();
