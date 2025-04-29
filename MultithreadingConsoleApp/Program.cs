@@ -1,37 +1,30 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using MultithreadingConsoleApp;
+using var semaphore = new Semaphore(3, 3);
 
-var threadSafeQueue = new SafeQueue<int>();
+var threads = Enumerable.Range(0, 10)
+    .Select(i =>
+    {
+        var thread = new Thread(SimulateDatabaseConnection)
+        {
+            Name = i.ToString()
+        };
+        thread.Start();
+        return thread;
+    })
+    .ToList();
 
-// Mutex always should be disposed! Othervise it'll block other threads or will cause MutexAbandonedException called
-using var mutex = new Mutex(false, "NamedMutex");
-
-// will try to acquire thread for one millisecond. If it still used by another thread - returns false
-while (!mutex.WaitOne(TimeSpan.FromMilliseconds(1)))
+foreach (var thread in threads)
 {
-    Console.WriteLine("Another instance of app is running!");
+    thread.Join();
 }
 
-int iterations = 100000;
-var consumerThread = new Thread(() =>
-{
-    for (int i = 0; i < iterations; i++)
-    {
-        Console.WriteLine(threadSafeQueue.Dequeue());    
-    }
-});
-var producerThread = new Thread(() =>
-{
-    for (int i = 0; i < iterations; i++)
-    {
-        threadSafeQueue.Enqueue(i);
-    }
-});
-consumerThread.Start();
-producerThread.Start();
-producerThread.Join();
-consumerThread.Join();
 
-// release Mutex
-mutex.ReleaseMutex();
+void SimulateDatabaseConnection()
+{
+    semaphore.WaitOne();
+    Console.WriteLine($"Thread {Thread.CurrentThread.Name} connected to database");
+    Thread.Sleep(2000);
+    semaphore.Release();
+    Console.WriteLine($"Thread {Thread.CurrentThread.Name} disconnected from database");
+}
