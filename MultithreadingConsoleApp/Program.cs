@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using var semaphore = new Semaphore(3, 3);
+using var semaphore = new SemaphoreSlim(3, 3);
 
 var threads = Enumerable.Range(0, 10)
     .Select(i =>
@@ -22,7 +22,7 @@ foreach (var thread in threads)
 
 void SimulateDatabaseConnection()
 {
-    semaphore.WaitOne();
+    semaphore.Wait();
     Console.WriteLine($"Thread {Thread.CurrentThread.Name} connected to database");
     Thread.Sleep(2000);
     semaphore.Release();
